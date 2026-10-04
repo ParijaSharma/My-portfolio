@@ -1,5 +1,6 @@
-import React, { useRef } from "react";
-import { ChevronLeft, ChevronRight, Sparkles, Layers } from "lucide-react";
+import React, { useRef, useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { motion } from "framer-motion";
 import { WashiTape } from "./Doodles";
 
 import javaIcon from "../assets/java.svg";
@@ -14,8 +15,10 @@ import jenkinsIcon from "../assets/jenkins.svg";
 
 function Carousel() {
   const scrollRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
 
-  const skills = [
+  const baseSkills = [
     {
       name: "React",
       category: "Frontend",
@@ -90,12 +93,52 @@ function Carousel() {
     },
   ];
 
+  // Duplicate skills list for infinite seamless loop
+  const skills = [...baseSkills, ...baseSkills];
+
+  // Auto-sliding loop using requestAnimationFrame
+  useEffect(() => {
+    let animationFrameId;
+    let lastTime = performance.now();
+
+    const step = (time) => {
+      const delta = time - lastTime;
+      lastTime = time;
+
+      if (isPlaying && !isHovered && scrollRef.current) {
+        // Smooth slide at ~45 pixels per second
+        const pixelsToScroll = (45 * delta) / 1000;
+        scrollRef.current.scrollLeft += pixelsToScroll;
+
+        // When half of the duplicated list has scrolled, loop seamlessly back to start
+        const halfWidth = scrollRef.current.scrollWidth / 2;
+        if (scrollRef.current.scrollLeft >= halfWidth) {
+          scrollRef.current.scrollLeft = 0;
+        }
+      }
+
+      animationFrameId = requestAnimationFrame(step);
+    };
+
+    animationFrameId = requestAnimationFrame(step);
+
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [isPlaying, isHovered]);
+
   const scrollRight = () => {
-    scrollRef.current?.scrollBy({ left: 320, behavior: "smooth" });
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: 320, behavior: "smooth" });
+    }
   };
 
   const scrollLeft = () => {
-    scrollRef.current?.scrollBy({ left: -320, behavior: "smooth" });
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -320, behavior: "smooth" });
+    }
+  };
+
+  const togglePlay = () => {
+    setIsPlaying((prev) => !prev);
   };
 
   return (
@@ -117,43 +160,89 @@ function Carousel() {
           </h2>
         </div>
 
-        {/* Scroll navigation buttons */}
-        <div className="flex items-center gap-2">
-          <button
+        {/* Scroll Controls: Stop / Slide Button + Arrows */}
+        <div className="flex items-center gap-2.5">
+          
+          {/* STOP / PLAY SLIDING BUTTON */}
+          <motion.button
+            onClick={togglePlay}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label={isPlaying ? "Stop sliding" : "Start sliding"}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-full border border-neutral-900 font-code text-xs font-bold uppercase transition-all shadow-[1px_1px_0px_#000] cursor-pointer ${
+              isPlaying
+                ? "bg-[#ffd84d] text-neutral-950 hover:bg-[#ffe169]"
+                : "bg-white text-neutral-800 hover:bg-neutral-100"
+            }`}
+          >
+            {isPlaying ? (
+              <>
+                <Pause className="w-3.5 h-3.5 fill-current" />
+                <span>Stop</span>
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse ml-0.5" />
+              </>
+            ) : (
+              <>
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>Slide</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 ml-0.5" />
+              </>
+            )}
+          </motion.button>
+
+          {/* Left Arrow */}
+          <motion.button
             onClick={scrollLeft}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
             aria-label="Scroll left"
-            className="w-10 h-10 rounded-full bg-white border border-neutral-900 flex items-center justify-center text-neutral-900 shadow-[1px_1px_0px_#000] hover:bg-[#ffd84d] hover:-translate-y-0.5 active:translate-y-0.5 transition-all cursor-pointer"
+            className="w-9 h-9 rounded-full bg-white border border-neutral-900 flex items-center justify-center text-neutral-900 shadow-[1px_1px_0px_#000] hover:bg-[#ffd84d] transition-all cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
-          </button>
-          <button
+          </motion.button>
+
+          {/* Right Arrow */}
+          <motion.button
             onClick={scrollRight}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
             aria-label="Scroll right"
-            className="w-10 h-10 rounded-full bg-white border border-neutral-900 flex items-center justify-center text-neutral-900 shadow-[1px_1px_0px_#000] hover:bg-[#ffd84d] hover:-translate-y-0.5 active:translate-y-0.5 transition-all cursor-pointer"
+            className="w-9 h-9 rounded-full bg-white border border-neutral-900 flex items-center justify-center text-neutral-900 shadow-[1px_1px_0px_#000] hover:bg-[#ffd84d] transition-all cursor-pointer"
           >
             <ChevronRight className="w-4 h-4" />
-          </button>
+          </motion.button>
         </div>
       </div>
 
-      {/* Horizontal Sticker Track */}
-      <div className="relative">
+      {/* Horizontal Sticker Track with Continuous Sliding */}
+      <div
+        className="relative"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         
         {/* Soft edge fade masks */}
-        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#faf8f5] to-transparent z-10 pointer-events-none hidden sm:block" />
-        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#faf8f5] to-transparent z-10 pointer-events-none hidden sm:block" />
+        <div className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-[#fbf9f5] to-transparent z-10 pointer-events-none hidden sm:block" />
+        <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-[#fbf9f5] to-transparent z-10 pointer-events-none hidden sm:block" />
 
         <div
           ref={scrollRef}
-          className="flex gap-6 overflow-x-auto no-scrollbar py-6 px-2 scroll-smooth"
+          className="flex gap-6 overflow-x-hidden no-scrollbar py-6 px-2 select-none"
+          style={{ scrollBehavior: isPlaying ? "auto" : "smooth" }}
         >
           {skills.map((skill, index) => (
-            <div
+            <motion.div
               key={index}
               style={{
                 transform: `rotate(${skill.rotation}deg)`,
               }}
-              className="flex-shrink-0 relative w-48 sm:w-52 bg-white rounded-xl p-5 pt-7 border border-neutral-800 shadow-[2px_3px_0px_#000] hover:shadow-[4px_6px_0px_#000] hover:rotate-0 hover:-translate-y-1.5 transition-all duration-300 group cursor-default"
+              whileHover={{
+                scale: 1.1,
+                rotate: 0,
+                y: -10,
+                transition: { type: "spring", stiffness: 380, damping: 14 },
+              }}
+              className="flex-shrink-0 relative w-48 sm:w-52 bg-white rounded-xl p-5 pt-7 border border-neutral-800 shadow-[2px_3px_0px_#000] hover:shadow-[5px_7px_0px_#000] transition-shadow duration-300 group cursor-pointer"
             >
               {/* Taped Washi Tape strip at top */}
               <WashiTape
@@ -168,24 +257,24 @@ function Carousel() {
                   {skill.category}
                 </span>
                 <span className="font-pixel text-[9px] text-neutral-400">
-                  #{String(index + 1).padStart(2, "0")}
+                  #{String((index % baseSkills.length) + 1).padStart(2, "0")}
                 </span>
               </div>
 
-              {/* Tech Icon */}
-              <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center p-2 rounded-lg bg-neutral-50 border border-neutral-100 group-hover:scale-110 transition-transform">
+              {/* Tech Icon with Canva Hover Pop */}
+              <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center p-2 rounded-lg bg-neutral-50 border border-neutral-100 group-hover:bg-[#fef9c3] group-hover:scale-110 transition-all duration-300">
                 <img
                   src={skill.icon}
                   alt={skill.name}
-                  className="w-12 h-12 object-contain filter group-hover:drop-shadow-sm"
+                  className="w-12 h-12 object-contain filter group-hover:drop-shadow-md"
                 />
               </div>
 
               {/* Title */}
-              <h3 className="text-center font-sans-main font-bold text-neutral-900 text-sm tracking-tight">
+              <h3 className="text-center font-sans-main font-bold text-neutral-900 text-sm tracking-tight group-hover:text-blue-600 transition-colors">
                 {skill.name}
               </h3>
-            </div>
+            </motion.div>
           ))}
         </div>
 

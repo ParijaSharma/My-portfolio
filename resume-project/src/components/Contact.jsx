@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Mail, Send, Check, Heart, FileText } from "lucide-react";
 import { FaLinkedinIn, FaGithub } from "react-icons/fa6";
+import { motion } from "framer-motion";
 import { WashiTape } from "./Doodles";
 
 function Contact() {
@@ -28,33 +29,50 @@ function Contact() {
       
       {/* Header */}
       <div className="text-center mb-10">
-        <div className="inline-block border border-neutral-900 rounded-md px-4 py-1 bg-white mb-2 shadow-[1px_1px_0px_#000]">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          whileInView={{ scale: 1, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ type: "spring", stiffness: 260, damping: 15 }}
+          className="inline-block border border-neutral-900 rounded-md px-4 py-1 bg-white mb-2 shadow-[1px_1px_0px_#000]"
+        >
           <span className="font-code text-xs font-bold uppercase tracking-wider text-neutral-900">
             ♥ SAY HELLO
           </span>
-        </div>
+        </motion.div>
+        
         <h2 className="text-3xl md:text-5xl font-extrabold text-neutral-950 tracking-tight">
           Let's make something great.
         </h2>
+        
         <p className="font-hand text-2xl text-neutral-600 mt-2">
           Drop a note or just say hi — I'd love to chat! ✨
         </p>
       </div>
 
-      {/* Postcard / Note slip container */}
-      <div className="relative max-w-2xl mx-auto bg-white rounded-2xl p-6 sm:p-10 border-2 border-neutral-900 shadow-[6px_6px_0px_#000]">
+      {/* Postcard / Note slip container (Canva Spring Rise) */}
+      <motion.div
+        initial={{ y: 30, opacity: 0 }}
+        whileInView={{ y: 0, opacity: 1 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ type: "spring", stiffness: 200, damping: 20 }}
+        className="relative max-w-2xl mx-auto bg-white rounded-2xl p-6 sm:p-10 border-2 border-neutral-900 shadow-[6px_6px_0px_#000]"
+      >
         
         {/* Top-left washi tape */}
         <WashiTape color="yellow" rotation={-20} className="-top-3 left-8" />
         {/* Top-right washi tape */}
         <WashiTape color="blue" rotation={15} className="-top-3 right-8" />
 
-        {/* Vintage Postmark stamp */}
-        <div className="absolute right-4 top-4 hidden sm:flex flex-col items-center justify-center w-16 h-16 rounded-full border-2 border-dashed border-red-400 text-red-500 transform rotate-12 select-none pointer-events-none opacity-80">
+        {/* Vintage Postmark stamp (Canva Hover Rotate & Spring) */}
+        <motion.div
+          whileHover={{ rotate: 22, scale: 1.15 }}
+          className="absolute right-4 top-4 hidden sm:flex flex-col items-center justify-center w-16 h-16 rounded-full border-2 border-dashed border-red-400 text-red-500 transform rotate-12 select-none cursor-pointer opacity-80"
+        >
           <span className="font-pixel text-[8px]">AIR MAIL</span>
           <Heart className="w-3.5 h-3.5 fill-current my-0.5" />
           <span className="font-code text-[8px]">2026</span>
-        </div>
+        </motion.div>
 
         {formSubmitted ? (
           <div className="py-12 text-center flex flex-col items-center">
@@ -118,35 +136,41 @@ function Contact() {
             {/* Submit button & Quick Actions */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
               
-              <button
+              <motion.button
                 type="submit"
-                className="w-full sm:w-auto px-6 py-2.5 bg-neutral-950 hover:bg-neutral-800 text-white rounded-full font-code text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[2px_2px_0px_#ffd84d] active:translate-y-0.5 transition cursor-pointer"
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-full sm:w-auto px-6 py-2.5 bg-neutral-950 hover:bg-neutral-800 text-white rounded-full font-code text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[2px_2px_0px_#ffd84d] transition cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>Send Note</span>
-              </button>
+              </motion.button>
 
               <div className="flex items-center gap-2 w-full sm:w-auto justify-center">
-                <button
+                <motion.button
                   type="button"
                   onClick={handleCopy}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   className="px-3.5 py-2 rounded-full border border-neutral-800 bg-white hover:bg-neutral-100 font-code text-xs font-semibold text-neutral-800 flex items-center gap-1.5 transition cursor-pointer"
                 >
                   {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Mail className="w-3.5 h-3.5" />}
                   <span>{copied ? "Copied!" : "Copy Email"}</span>
-                </button>
+                </motion.button>
 
-                <a
+                <motion.a
                   href="#resume"
                   onClick={(e) => {
                     e.preventDefault();
                     alert("Resume download / PDF viewer ready!");
                   }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   className="px-3.5 py-2 rounded-full border border-neutral-800 bg-[#fde047] hover:bg-[#facc15] font-code text-xs font-bold text-neutral-950 flex items-center gap-1.5 shadow-[1px_1px_0px_#000] transition cursor-pointer"
                 >
                   <FileText className="w-3.5 h-3.5" />
                   <span>Resume (PDF)</span>
-                </a>
+                </motion.a>
               </div>
 
             </div>
@@ -154,7 +178,7 @@ function Contact() {
           </form>
         )}
 
-      </div>
+      </motion.div>
 
       {/* Bottom Footer Note */}
       <div className="mt-16 text-center text-xs font-code text-neutral-500 space-y-1">

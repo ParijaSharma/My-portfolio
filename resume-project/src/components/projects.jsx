@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 import { FaGithub } from "react-icons/fa6";
 
@@ -114,17 +115,19 @@ function Projects() {
 
         <div className="flex gap-1 bg-neutral-900/10 p-1.5 rounded-xl border border-neutral-300 w-fit">
           {projectsData.map((p, i) => (
-            <button
+            <motion.button
               key={p.id}
               onClick={() => changeProject(i)}
-              className={`px-3 md:px-4 py-1.5 rounded-lg font-code text-xs font-bold transition ${
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`px-3 md:px-4 py-1.5 rounded-lg font-code text-xs font-bold transition cursor-pointer ${
                 activeTab === i
-                  ? "bg-neutral-900 text-white"
+                  ? "bg-neutral-900 text-white shadow-sm"
                   : "text-neutral-700 hover:bg-white"
               }`}
             >
               {p.tabTitle}
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
@@ -420,30 +423,39 @@ function Projects() {
       </div>
 
       {/* LIGHTBOX */}
-      {expandedImage && (
-        <div
-          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4"
-          onClick={() => setExpandedImage(null)}
-        >
-          <div
-            className="relative max-w-5xl w-full bg-neutral-900 p-2 rounded-2xl border border-neutral-700"
-            onClick={(e) => e.stopPropagation()}
+      <AnimatePresence>
+        {expandedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4"
+            onClick={() => setExpandedImage(null)}
           >
-            <button
-              onClick={() => setExpandedImage(null)}
-              className="float-right m-2 text-neutral-400 hover:text-white font-code text-xs px-3 py-1 bg-neutral-800 rounded"
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.85, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20 }}
+              className="relative max-w-5xl w-full bg-neutral-900 p-2 rounded-2xl border border-neutral-700 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
             >
-              ✕ CLOSE
-            </button>
+              <button
+                onClick={() => setExpandedImage(null)}
+                className="float-right m-2 text-neutral-400 hover:text-white font-code text-xs px-3 py-1 bg-neutral-800 hover:bg-neutral-700 rounded transition cursor-pointer"
+              >
+                ✕ CLOSE
+              </button>
 
-            <img
-              src={expandedImage}
-              alt="Expanded preview"
-              className="w-full max-h-[80vh] object-contain rounded-lg"
-            />
-          </div>
-        </div>
-      )}
+              <img
+                src={expandedImage}
+                alt="Expanded preview"
+                className="w-full max-h-[80vh] object-contain rounded-lg"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
